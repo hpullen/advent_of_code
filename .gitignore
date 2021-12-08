@@ -1,4 +1,3 @@
 .*
 !.gitignore
 Solution
-obj/*.o
