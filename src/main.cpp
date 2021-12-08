@@ -1,54 +1,57 @@
 #include <iostream>
-#include <vector>
+#include <memory>
+#include <map>
 #include <tuple>
+#include <vector>
 
 #include "functions.hpp"
 #include "BingoBoard.hpp"
 
 
-// Get list of numbers called and bingo boards
-std::tuple<std::vector<int>, std::vector<BingoBoard*>> get_nums_and_boards(
-        const std::string& filename
-        ) {
+typedef std::vector<int> NumList;
+typedef std::vector<std::unique_ptr<BingoBoard>> BoardList;
 
-    // Read lines from file
+
+// Get bingo numbers and bingo boards
+std::tuple<NumList, BoardList> get_nums_and_boards(const std::string& filename) 
+{
+
+    // Read lines from input file
     auto lines = funcs::read_file(filename);
 
-    // Read called numbers into vector
+    // Read numbers into vector of strings
     auto num_strs = funcs::split_string(lines[0], ",");
 
     // Convert to ints
-    std::vector<int> nums;
+    NumList nums;
     for (auto str : num_strs) {
         nums.push_back(std::stoi(str));
     }
 
     // Create bingo boards
-    std::vector<BingoBoard *> boards;
-    BingoBoard *current_board;
-    for (int i=1; i < lines.size(); i++) {
+    BoardList boards;
+    int id = -1;
+    for (int i = 1; i < lines.size(); i++) {
 
         // If line is blank, make new board
         if (!lines[i].length()) {
-            current_board = new BingoBoard();
-            boards.push_back(current_board);
+            id++;
+            auto new_board = std::make_unique<BingoBoard>();
+            boards.push_back(std::move(new_board));
         }
 
         // Otherwise, add row to current board
         else {
-            current_board->add_row(lines[i]);
+            boards[id]->add_row(lines[i]);
         }
     }
 
-    return {nums, boards};
+    return {nums, std::move(boards)};
 }
 
 
-// Part one: find first board to win and return sum of its unticked numbers
-int part_one(
-        const std::vector<int>& nums, 
-        const std::vector<BingoBoard*>& boards
-        ) {
+// Part one: find first board to win
+int part_one(const NumList& nums, const BoardList& boards) {
 
     // Call all numbers until a winner is found
     for (auto const& num : nums) {
@@ -59,37 +62,41 @@ int part_one(
             }
         }
     }
-
     return -1;
 }
 
 
-// Part two: find last board to win and return sum of its unticked numbers
-int part_two(
-        const std::vector<int>& nums, 
-        std::vector<BingoBoard*> boards
-        ) {
+// Part two: find last board to win
+int part_two(const NumList& nums, const BoardList& boards) {
 
+    // Make list of positions of remaining boards; initially all boards
+    std::vector<int> board_ids;
+    for (int i = 0; i < boards.size(); i++) {
+        board_ids.push_back(i);
+    }
+
+    // Loop through bingo numbers
     for (auto const& num : nums) {
-        
-        // Call number for all boards
-        for (auto const& b : boards) {
-            b->call_number(num);
-        }
 
-        // Check whether only one board remains and has won
-        if (boards.size() == 1 && boards[0]->is_winner()) {
-            return boards[0]->sum_unticked() * num;
-        }
+        // Call number for remaining boards
+        std::vector<int> remaining;
+        for (int id : board_ids) {
 
-        // Reduce boards list to only those that haven't yet won
-        std::vector<BingoBoard*> remaining;
-        for (auto const& b : boards) {
-            if (!b->is_winner()) {
-                remaining.push_back(b);
+            boards[id]->call_number(num);
+
+            // Store IDs of boards that still haven't won
+            if (!boards[id]->is_winner()) {
+                remaining.push_back(id);
             }
         }
-        boards = remaining;
+
+        // Check whether only one board remained and has now won
+        if (board_ids.size() == 1 && remaining.size() == 0) {
+            return boards[board_ids[0]]->sum_unticked() * num;
+        }
+
+        // Set board IDs list to only those that haven't yet won
+        board_ids = remaining;
     }
 
     return -1;
@@ -112,10 +119,5 @@ int main(int argc, char* argv[]) {
     std::cout << "Part 1: " << part_one(nums, boards) << std::endl;
     std::cout << "Part 2: " << part_two(nums, boards) << std::endl;
     
-    // Delete BingoBoard objects
-    for (auto b : boards) {
-        delete b;
-    }
-
     return 0;
 }
