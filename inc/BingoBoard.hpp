@@ -24,9 +24,6 @@ class BingoBoard {
 
     private:
 
-        int get_width();
-        int get_height();
-
         std::vector<std::vector<int>> board;
         std::vector<std::vector<bool>> ticked;
 
