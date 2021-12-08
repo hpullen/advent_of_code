@@ -44,7 +44,7 @@ std::tuple<std::vector<int>, std::vector<BingoBoard*>> get_nums_and_boards(
 }
 
 
-// Part one: find first board to win and return sum of its unmarked numbers
+// Part one: find first board to win and return sum of its unticked numbers
 int part_one(
         const std::vector<int>& nums, 
         const std::vector<BingoBoard*>& boards
@@ -55,7 +55,7 @@ int part_one(
         for (auto const& b : boards) {
             b->call_number(num);
             if (b->is_winner()) {
-                return b->sum_unmarked() * num;
+                return b->sum_unticked() * num;
             }
         }
     }
@@ -64,7 +64,7 @@ int part_one(
 }
 
 
-// Part two: find last board to win and return sum of its unmarked numbers
+// Part two: find last board to win and return sum of its unticked numbers
 int part_two(
         const std::vector<int>& nums, 
         std::vector<BingoBoard*> boards
@@ -79,7 +79,7 @@ int part_two(
 
         // Check whether only one board remains and has won
         if (boards.size() == 1 && boards[0]->is_winner()) {
-            return boards[0]->sum_unmarked() * num;
+            return boards[0]->sum_unticked() * num;
         }
 
         // Reduce boards list to only those that haven't yet won

@@ -19,7 +19,7 @@ class BingoBoard {
         void add_row(std::string row);
         void call_number(int num);
         bool is_winner();
-        int sum_unmarked();
+        int sum_unticked();
         void print();
 
     private:

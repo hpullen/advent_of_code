@@ -76,9 +76,9 @@ bool BingoBoard::is_winner() {
 
 
 // ==============================
-// Return sum of unmarked numbers
+// Return sum of unticked numbers
 // ==============================
-int BingoBoard::sum_unmarked() {
+int BingoBoard::sum_unticked() {
     
     int sum = 0;
     for (int i = 0; i < board.size(); i++) {
