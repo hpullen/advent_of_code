@@ -23,7 +23,7 @@ void BingoBoard::add_row(std::string row) {
 
     std::vector<int> row_ints;
     std::vector<bool> ticked_row;
-    for (auto str : funcs::split_string(row)) {
+    for (auto const& str : funcs::split_string(row)) {
         row_ints.push_back(std::stoi(str));
         ticked_row.push_back(false);
     }
@@ -54,9 +54,9 @@ void BingoBoard::call_number(int num) {
 bool BingoBoard::is_winner() {
 
     // Check rows
-    for (auto row : ticked) {
+    for (auto const& row : ticked) {
         bool filled = true;
-        for (auto col : row) {
+        for (auto const& col : row) {
             if (!col) filled = false;
         }
         if (filled) return true;
@@ -65,7 +65,7 @@ bool BingoBoard::is_winner() {
     // Check columns
     for (int i = 0; i < ticked[0].size(); i++) {
         bool filled = true;
-        for (auto row : ticked) {
+        for (auto const& row : ticked) {
             if (!row[i]) filled = false;
         }
         if (filled) return true;
